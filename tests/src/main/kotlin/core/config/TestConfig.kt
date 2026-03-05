@@ -1,4 +1,4 @@
-package config
+package core.config
 
 /**
  * Удобный доступ ко всем конфигурационным параметрам тестов.
@@ -27,11 +27,32 @@ object TestConfig {
         val timeout: Long by lazy { EnvironmentConfig.getProperty("browser.timeout", "15000").toLong() }
         val size: String by lazy { EnvironmentConfig.getProperty("browser.size", "1920x1080") }
         val headless: Boolean by lazy { EnvironmentConfig.getProperty("browser.headless", "true").toBoolean() }
-        val selenoidUrl: String by lazy { EnvironmentConfig.getProperty("browser.selenoid.url", "http://localhost:4444/wd/hub") }
+        val selenoidUrl: String by lazy {
+            EnvironmentConfig.getProperty(
+                "browser.selenoid.url",
+                "http://localhost:4444/wd/hub"
+            )
+        }
 
         // Дополнительные опции для Selenoid
         val selenoidEnableVnc: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.vnc", "true").toBoolean() }
         val selenoidEnableVideo: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.video", "false").toBoolean() }
         val selenoidEnableLog: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.log", "true").toBoolean() }
+
+        // Специфичные для Selenoid в Testcontainers
+        val selenoidInTestcontainersEnabled: Boolean by lazy {
+            EnvironmentConfig.getProperty("browser.selenoid.in.testcontainers", "false").toBoolean()
+        }
+
+        // Версии браузеров для Selenoid
+        val selenoidChromeVersion: String by lazy {
+            EnvironmentConfig.getProperty("browser.selenoid.chrome.version", "122.0")
+        }
+        val selenoidFirefoxVersion: String by lazy {
+            EnvironmentConfig.getProperty("browser.selenoid.firefox.version", "123.0")
+        }
+        val selenoidEdgeVersion: String by lazy {
+            EnvironmentConfig.getProperty("browser.selenoid.edge.version", "122.0")
+        }
     }
 }

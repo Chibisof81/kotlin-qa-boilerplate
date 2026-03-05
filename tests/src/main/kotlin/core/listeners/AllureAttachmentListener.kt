@@ -1,4 +1,4 @@
-package core.listeners
+package core.core.listeners
 
 import io.qameta.allure.Attachment
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback

@@ -1,13 +1,13 @@
-package smoke
+package ui.regression
 
 import base.BaseUiTest
 import com.codeborne.selenide.Selenide.open
 import com.codeborne.selenide.Selenide.sleep
-import core.listeners.RetryIfFailed
+import core.core.listeners.RetryIfFailed
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class LoginTest : BaseUiTest() {
+class ExampleTest : BaseUiTest() {
 
     @Test
     @Tag("smoke")

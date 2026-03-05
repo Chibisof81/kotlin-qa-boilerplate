@@ -4,6 +4,5 @@ plugins {
 
 rootProject.name = "kotlin-qa-boilerplate"
 
-include("core")
-include("ui-tests")
+include("tests")
 

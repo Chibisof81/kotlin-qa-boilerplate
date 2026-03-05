@@ -1,9 +1,9 @@
 package core
 
-import config.TestConfig
-import core.listeners.AllureAttachmentListener
-import core.listeners.RetryListener
-import core.listeners.TestLifecycleLogger
+import core.config.TestConfig
+import core.core.listeners.AllureAttachmentListener
+import core.core.listeners.RetryListener
+import core.core.listeners.TestLifecycleLogger
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.Logger

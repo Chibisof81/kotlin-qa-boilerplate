@@ -1,0 +1,37 @@
+{
+  "chrome": {
+    "default": "122.0",
+    "versions": {
+      "122.0": {
+        "image": "selenoid/chrome:122.0",
+        "port": "4444",
+        "path": "/"
+      },
+      "121.0": {
+        "image": "selenoid/chrome:121.0",
+        "port": "4444",
+        "path": "/"
+      }
+    }
+  },
+  "firefox": {
+    "default": "123.0",
+    "versions": {
+      "123.0": {
+        "image": "selenoid/firefox:123.0",
+        "port": "4444",
+        "path": "/wd/hub"
+      }
+    }
+  },
+  "edge": {
+    "default": "122.0",
+    "versions": {
+      "122.0": {
+        "image": "selenoid/edge:122.0",
+        "port": "4444",
+        "path": "/wd/hub"
+      }
+    }
+  }
+}

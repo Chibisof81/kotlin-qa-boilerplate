@@ -1,8 +1,9 @@
 package base
 
 // Импорты из core модуля (работают благодаря зависимости)
-import config.BrowserConfig
+import com.codeborne.selenide.Selenide
 import core.BaseTest
+import core.core.config.BrowserConfig
 import org.junit.jupiter.api.*
 
 /**
@@ -29,8 +30,9 @@ abstract class BaseUiTest : BaseTest() {
     @AfterAll
     fun tearDownBrowser() {
         log.info("🧹 Очистка браузера после UI-тестов")
-        com.codeborne.selenide.Selenide.clearBrowserCookies()
-        com.codeborne.selenide.Selenide.clearBrowserLocalStorage()
+        Selenide.clearBrowserCookies()
+        Selenide.clearBrowserLocalStorage()
+        Selenide.closeWebDriver()
         BrowserConfig.teardown()
     }
 }
