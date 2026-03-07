@@ -1,11 +1,14 @@
 package core.core.listeners
 
+import com.codeborne.selenide.Selenide
+import com.codeborne.selenide.WebDriverRunner
+import core.config.EnvironmentConfig
 import io.qameta.allure.Attachment
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.openqa.selenium.OutputType
+import org.openqa.selenium.logging.LogType
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
-import java.nio.file.Paths
 
 /**
  * JUnit 5 Extension для прикрепления дополнительных артефактов к Allure отчёту.
@@ -35,61 +38,43 @@ class AllureAttachmentListener : AfterTestExecutionCallback {
     }
 
     override fun afterTestExecution(context: ExtensionContext?) {
-        context ?: return
-
-        // Проверяем, упал ли тест
-        val testFailed = context.executionException.isPresent
+        val testFailed = context?.executionException?.isPresent ?: false
 
         if (testFailed) {
-            log.info("📸 Тест упал, прикрепляем артефакты к Allure отчёту")
-
-            // 1. Прикрепляем системную информацию
+            // 1. Системная информация из нашего нового конфига
             attachSystemInfo(
                 """
+
                 |ОС: ${System.getProperty("os.name")}
-                |Java: ${System.getProperty("java.version")}
-                |Пользователь: ${System.getProperty("user.name")}
-                |Рабочая директория: ${System.getProperty("user.dir")}
-                |Активный профиль: ${System.getProperty("env", "default")}
+                |Профиль: ${EnvironmentConfig.getProperty("env", "default")}
+                |URL стенда: ${EnvironmentConfig.getProperty("ui.base.url", "N/A")}
+                |Браузер: ${System.getProperty("selenide.browser", "chrome")}
                 """.trimMargin()
             )
 
-            // 2. Пытаемся найти скриншот (Selenide сохраняет в build/reports/tests)
-            try {
-                val screenshotDir = Paths.get("build/reports/tests/screenshots")
-                if (Files.exists(screenshotDir)) {
-                    Files.walk(screenshotDir)
-                        .filter { Files.isRegularFile(it) && it.toString().endsWith(".png") }
-                        .max { a, b ->
-                            Files.getLastModifiedTime(a).compareTo(Files.getLastModifiedTime(b))
-                        }
-                        .ifPresent { latestScreenshot ->
-                            val bytes = Files.readAllBytes(latestScreenshot)
-                            attachScreenshot(bytes)
-                            log.info("   Скриншот прикреплён: ${latestScreenshot.fileName}")
-                        }
-                }
-            } catch (e: Exception) {
-                log.warn("   Не удалось прикрепить скриншот: ${e.message}")
+            // 2. Скриншот через Selenide (если он в стеке)
+            // Это безопаснее, чем искать файлы в папках
+            val screenshot = Selenide.screenshot(OutputType.BYTES)
+            if (screenshot != null) {
+                attachScreenshot(screenshot)
             }
 
-            // 3. Пытаемся прикрепить page source (если есть)
+            // 3. Логи браузера (Console Logs)
+            val logs = Selenide.getWebDriverLogs(LogType.BROWSER).joinToString("\n")
+            if (logs.isNotEmpty()) {
+                attachBrowserLogs(logs)
+            }
+
+            // Внутри afterTestExecution, если тест упал:
             try {
-                val sourceDir = Paths.get("build/reports/tests/page-source")
-                if (Files.exists(sourceDir)) {
-                    Files.walk(sourceDir)
-                        .filter { Files.isRegularFile(it) && it.toString().endsWith(".html") }
-                        .max { a, b ->
-                            Files.getLastModifiedTime(a).compareTo(Files.getLastModifiedTime(b))
-                        }
-                        .ifPresent { latestSource ->
-                            val content = Files.readString(latestSource)
-                            attachPageSource(content)
-                            log.info("   Page source прикреплён")
-                        }
-                }
+                val currentUrl = WebDriverRunner.getWebDriver().currentUrl
+                val pageTitle = WebDriverRunner.getWebDriver().title
+                val pageContent = WebDriverRunner.source()
+
+                val fullSource = "URL: $currentUrl\nTitle: $pageTitle\n\n$pageContent"
+                attachPageSource(fullSource)
             } catch (e: Exception) {
-                log.warn("   Не удалось прикрепить page source: ${e.message}")
+                log.warn("Не удалось получить Page Source: ${e.message}")
             }
         }
     }

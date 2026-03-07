@@ -27,6 +27,4 @@ class ExampleTest : BaseUiTest() {
         open("/")
         sleep(5000)
     }
-
-
 }

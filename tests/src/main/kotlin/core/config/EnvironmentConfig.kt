@@ -19,6 +19,21 @@ object EnvironmentConfig {
     private val profiles: List<String> = loadProfiles()
     private val properties: Properties = loadProperties()
 
+    init {
+        val criticalProps = listOf("ui.base.url", "api.token")
+        criticalProps.forEach { prop ->
+            if (!hasProperty(prop)) {
+                // Мы сразу поймем, что забыли прокинуть переменную
+                println("WARNING: Critical property '$prop' is missing!")
+            }
+        }
+        // Полезно для логов в CI/CD
+        println("--- CONFIG LOADED ---")
+        println("Active Profiles: $profiles")
+        println("Target UI URL: ${getProperty("ui.base.url")}")
+        println("---------------------")
+    }
+
     /**
      * Возвращает значение свойства по ключу.
      * Сначала ищет в System.getProperty (передано через -D),
@@ -28,7 +43,12 @@ object EnvironmentConfig {
         // 1. Проверяем System Properties (наивысший приоритет)
         System.getProperty(key)?.let { return it }
 
-        // 2. Ищем в загруженных файлах
+        // 2. Проверяем Environment Variables (UI_BASE_URL)
+        // Преобразуем точку в подчеркивание и в верхний регистр
+        val envKey = key.replace(".", "_").uppercase()
+        System.getenv(envKey)?.let { return it }
+
+        // 3. Ищем в загруженных файлах
         return properties.getProperty(key)
             ?: error("Property '$key' not found in any config file or system properties")
     }
@@ -52,7 +72,10 @@ object EnvironmentConfig {
      * Проверяет, существует ли свойство.
      */
     fun hasProperty(key: String): Boolean {
-        return System.getProperty(key) != null || properties.containsKey(key)
+        val envKey = key.replace(".", "_").uppercase()
+        return System.getProperty(key) != null
+                || System.getenv(envKey) != null
+                || properties.containsKey(key)
     }
 
     private fun loadProfiles(): List<String> {

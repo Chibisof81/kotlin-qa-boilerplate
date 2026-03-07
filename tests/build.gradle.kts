@@ -48,4 +48,12 @@ tasks.test {
     systemProperty("junit.jupiter.execution.parallel.enabled", "true")
     systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
     systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+
+    // Пробрасываем все системные свойства (переданные через -Dkey=value)
+    systemProperties(System.getProperties().mapKeys { it.key.toString() })
+
+    // Если вы хотите явно пробросить переменные окружения (Environment Variables)
+    // Gradle делает это автоматически для текущего процесса,
+    // но для надежности в некоторых CI это прописывают так:
+    environment(System.getenv())
 }
