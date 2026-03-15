@@ -38,21 +38,5 @@ object TestConfig {
         val selenoidEnableVnc: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.vnc", "true").toBoolean() }
         val selenoidEnableVideo: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.video", "false").toBoolean() }
         val selenoidEnableLog: Boolean by lazy { EnvironmentConfig.getProperty("browser.selenoid.log", "true").toBoolean() }
-
-        // Специфичные для Selenoid в Testcontainers
-        val selenoidInTestcontainersEnabled: Boolean by lazy {
-            EnvironmentConfig.getProperty("browser.selenoid.in.testcontainers", "false").toBoolean()
-        }
-
-        // Версии браузеров для Selenoid
-        val selenoidChromeVersion: String by lazy {
-            EnvironmentConfig.getProperty("browser.selenoid.chrome.version", "122.0")
-        }
-        val selenoidFirefoxVersion: String by lazy {
-            EnvironmentConfig.getProperty("browser.selenoid.firefox.version", "123.0")
-        }
-        val selenoidEdgeVersion: String by lazy {
-            EnvironmentConfig.getProperty("browser.selenoid.edge.version", "122.0")
-        }
     }
 }

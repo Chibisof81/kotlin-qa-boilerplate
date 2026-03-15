@@ -46,6 +46,7 @@ object EnvironmentConfig {
         // 2. Проверяем Environment Variables (UI_BASE_URL)
         // Преобразуем точку в подчеркивание и в верхний регистр
         val envKey = key.replace(".", "_").uppercase()
+        println("DEBUG getProperty key=$key envKey=$envKey env=${System.getenv(envKey)} sys=${System.getProperty(key)}")
         System.getenv(envKey)?.let { return it }
 
         // 3. Ищем в загруженных файлах
@@ -54,7 +55,7 @@ object EnvironmentConfig {
     }
 
     /**
-     * Возвращает свойство с значением по умолчанию, если не найдено.
+     * Возвращает свойство со значением по умолчанию, если не найдено.
      */
     fun getProperty(key: String, defaultValue: String): String {
         return getPropertyOrNull(key) ?: defaultValue
@@ -65,6 +66,11 @@ object EnvironmentConfig {
      */
     fun getPropertyOrNull(key: String): String? {
         System.getProperty(key)?.let { return it }
+
+        // ✅ Добавить проверку Environment Variables
+        val envKey = key.replace(".", "_").uppercase()
+        System.getenv(envKey)?.let { return it }
+
         return properties.getProperty(key)
     }
 

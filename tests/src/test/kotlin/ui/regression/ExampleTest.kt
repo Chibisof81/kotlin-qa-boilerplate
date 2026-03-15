@@ -1,11 +1,11 @@
 package ui.regression
 
-import base.BaseUiTest
 import com.codeborne.selenide.Selenide.open
 import com.codeborne.selenide.Selenide.sleep
 import core.core.listeners.RetryIfFailed
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import ui.BaseUiTest
 
 class ExampleTest : BaseUiTest() {
 
@@ -19,12 +19,14 @@ class ExampleTest : BaseUiTest() {
         // Логирование из BaseTest
         log.info("Тестируем логин с email: $email")
 
+        sleep(5000)
+
         // UI тест...
     }
 
     @Test
     fun openYa(){
         open("/")
-        sleep(5000)
+        sleep(10000)
     }
 }
