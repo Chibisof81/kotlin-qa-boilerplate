@@ -1,6 +1,6 @@
 package ui
 
-import core.core.config.BrowserConfig
+import core.config.BrowserConfig
 import com.codeborne.selenide.Selenide
 import core.BaseTest
 import org.junit.jupiter.api.*
@@ -14,13 +14,13 @@ open class BaseUiTest: BaseTest() {
         BrowserConfig.setup()
     }
 
-    @BeforeEach
-    open fun setupTest() {
-        // ✅ Чистая сессия для каждого теста (новая вкладка)
-        Selenide.open("/")
-        Selenide.clearBrowserCookies()
-        Selenide.clearBrowserLocalStorage()
-    }
+//    @BeforeEach
+//    open fun setupTest() {
+//        // ✅ Чистая сессия для каждого теста (новая вкладка)
+//        Selenide.open("/")
+//        Selenide.clearBrowserCookies()
+//        Selenide.clearBrowserLocalStorage()
+//    }
 
     @AfterEach
     open fun teardownTest() {
