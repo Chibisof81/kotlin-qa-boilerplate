@@ -32,6 +32,9 @@ object BrowserConfig {
         }
     }
 
+    private fun shouldRunHeadless() = TestConfig.Browser.headless && mode == RunMode.LOCAL
+
+
     @Volatile
     private var webDriverContainer: BrowserWebDriverContainer<*>? = null
     private val lock = Any()
@@ -40,18 +43,23 @@ object BrowserConfig {
         logger.info("🌐 BrowserConfig: starting in {} mode", mode)
         logger.info("Browser: {} {}", TestConfig.Browser.name, TestConfig.Browser.version)
         logger.info("Timeout: {}ms", TestConfig.Browser.timeout)
-        logger.info("Headless: {}", TestConfig.Browser.headless && mode == RunMode.LOCAL)
+        logger.info("Headless: {}", shouldRunHeadless())
 
         // ✅ ВАЖНО: Запустить контейнер ПЕРЕД конфигурацией Selenide
-        when (mode) {
-            RunMode.TESTCONTAINERS -> setupTestcontainers()
-            RunMode.SELENOID -> {} // Selenoid уже запущен
-            RunMode.LOCAL -> {} // Локальный браузер
-        }
+        try {
+            when (mode) {
+                RunMode.TESTCONTAINERS -> setupTestcontainers()
+                RunMode.SELENOID -> {} // Selenoid уже запущен
+                RunMode.LOCAL -> {} // Локальный браузер
+            }
 
-        // ✅ ТОЛЬКО ПОСЛЕ этого конфигурируем Selenide
-        configureSelenide()
-        setupAllureLogger()
+            // ✅ ТОЛЬКО ПОСЛЕ этого конфигурируем Selenide
+            configureSelenide()
+            setupAllureLogger()
+        } catch (e: Exception) {
+            cleanup()
+            throw e
+        }
     }
 
     private fun setupTestcontainers() {
@@ -99,9 +107,9 @@ object BrowserConfig {
 
     private fun configureSelenide() {
         Configuration().apply {
-            timeout = TestConfig.Browser.timeout.toLong()
+            timeout = TestConfig.Browser.timeout
             browserSize = TestConfig.Browser.size
-            headless = TestConfig.Browser.headless && mode == RunMode.LOCAL
+            headless = shouldRunHeadless()
             baseUrl = TestConfig.uiBaseUrl
             reportsFolder = "build/reports/tests"
             screenshots = true
@@ -110,14 +118,18 @@ object BrowserConfig {
             // ✅ КЛЮЧЕВОЙ МОМЕНТ: Установить remote ПЕРЕД инициализацией браузера
             when (mode) {
                 RunMode.TESTCONTAINERS -> {
-                    remote = webDriverContainer!!.seleniumAddress.toString()
+                    val address = webDriverContainer?.seleniumAddress?.toString()
+                        ?: throw IllegalStateException("Testcontainers not initialized")
+                    remote = address
                     logger.info("🔴 Selenium Remote: {}", remote)
                 }
+
                 RunMode.SELENOID -> {
                     remote = TestConfig.Browser.selenoidUrl
                     browserVersion = TestConfig.Browser.version
                     logger.info("🔴 Selenoid URL: {}", remote)
                 }
+
                 RunMode.LOCAL -> {
                     remote = null  // Явно указываем локальный браузер
                     logger.info("🌐 Using local browser")
@@ -160,7 +172,7 @@ object BrowserConfig {
                 "--disable-notifications",
                 "--disable-blink-features=AutomationControlled"
             )
-            if (Configuration.headless) addArguments("--headless=new")
+            if (headless) addArguments("--headless=new")
         }
         return DesiredCapabilities().apply {
             setCapability("browserName", "chrome")
@@ -171,7 +183,7 @@ object BrowserConfig {
 
     private fun createFirefoxCapabilities(): DesiredCapabilities {
         val options = FirefoxOptions().apply {
-            if (Configuration.headless) addArguments("--headless")
+            if (headless) addArguments("--headless")
         }
         return DesiredCapabilities().apply {
             setCapability("browserName", "firefox")
@@ -187,7 +199,7 @@ object BrowserConfig {
                 "--disable-dev-shm-usage",
                 "--remote-allow-origins=*"
             )
-            if (Configuration.headless) addArguments("--headless=new")
+            if (headless) addArguments("--headless=new")
         }
         return DesiredCapabilities().apply {
             setCapability("browserName", "MicrosoftEdge")
@@ -207,7 +219,6 @@ object BrowserConfig {
 
     private fun logContainerInfo() {
         webDriverContainer?.let {
-            logger.info("✅ Container started successfully")
             logger.info("🔴 Selenium Remote: {}", it.seleniumAddress)
             if (TestConfig.Browser.selenoidEnableVnc) {
                 logger.info(
