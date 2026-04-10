@@ -206,7 +206,7 @@ kotlin-qa-boilerplate/
 
 #### DefaultSpecs — готовые спецификации
 
-```kotlin
+```text
 DefaultSpecs.defaultRequestSpec          // Базовая
 DefaultSpecs.authorizedRequestSpec       // С авторизацией
 DefaultSpecs.multipartRequestSpec        // Для файлов
@@ -232,7 +232,7 @@ DefaultSpecs.authorizedWithTokenSpec("token") // С кастомным токе�
 
 #### DefaultSpecs — готовые спецификации
 
-```kotlin
+```text
 DefaultSpecs.defaultResponseSpec         // Без валидаций
 DefaultSpecs.successResponseSpec         // statusCode < 400
 DefaultSpecs.strictSuccessResponseSpec   // 200 + JSON + time
@@ -276,7 +276,7 @@ class UsersApiClient : ApiClient() {
 
 #### Простой тест
 
-```kotlin
+```text
 @Epic("API Tests")
 @Feature("Users")
 class UsersApiTest : BaseTest() {
@@ -287,7 +287,7 @@ class UsersApiTest : BaseTest() {
     @DisplayName("Получить список пользователей")
     fun `get users - success`() {
         val response = usersClient.getUsers()
-        
+
         response.then()
             .spec(DefaultSpecs.successResponseSpec)
     }
@@ -296,7 +296,7 @@ class UsersApiTest : BaseTest() {
 
 #### Тест с валидацией тела ответа
 
-```kotlin
+```text
 @Test
 fun `create user - validate response`() {
     val userBody = mapOf(
@@ -315,7 +315,7 @@ fun `create user - validate response`() {
 
 #### Тест с JSON Schema валидацией
 
-```kotlin
+```text
 @Test
 fun `get user - validate schema`() {
     val response = usersClient.getUserById("123")
@@ -328,7 +328,7 @@ fun `get user - validate schema`() {
 
 #### Тест с проверкой времени ответа
 
-```kotlin
+```text
 @Test
 fun `delete user - check response time`() {
     val response = usersClient.deleteUser("123")
