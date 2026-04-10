@@ -27,6 +27,10 @@ dependencies {
 
     api(libs.commons.configuration)
     api(libs.kotlin.reflect)
+
+    // REST Assured
+    api(libs.restassured)
+    api(libs.restassured.json.schema)
 }
 
 java {

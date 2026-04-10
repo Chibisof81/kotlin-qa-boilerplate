@@ -119,6 +119,16 @@ kotlin-qa-boilerplate/
 │   │   │   │   │           ├── application-dev.properties
 │   │   │   │   │           ├── application-prod.properties
 │   │   │   │   │           └── application-stage.properties
+│   │   │   │   ├── api/                            # API тестирование (REST Assured)
+│   │   │   │   │   ├── config/
+│   │   │   │   │   │   ├── ApiConfig.kt            # API настройки (URL, timeouts, logging)
+│   │   │   │   │   │   └── AuthConfig.kt           # Авторизация (Basic/Bearer/API Key/OAuth2)
+│   │   │   │   │   ├── spec/
+│   │   │   │   │   │   ├── RequestSpecBuilder.kt   # Builder request спецификаций
+│   │   │   │   │   │   ├── ResponseSpecBuilder.kt  # Builder response спецификаций
+│   │   │   │   │   │   └── DefaultSpecs.kt         # Готовые спецификации
+│   │   │   │   │   └── client/
+│   │   │   │   │       └── ApiClient.kt            # Базовый API клиент
 │   │   │   │   └── ui/
 │   │   │   │       ├── regression/
 │   │   │   │       │   └── ExampleTest.kt
@@ -126,7 +136,12 @@ kotlin-qa-boilerplate/
 │   │   │   └── selenoid/config/
 │   │   │       └── browsers.json
 │   │   └── test/
-│   │       └── kotlin/ui/...
+│   │       └── kotlin/
+│   │           ├── api/
+│   │           │   └── example/
+│   │           │       ├── UsersApiClient.kt       # Пример API клиента
+│   │           │       └── UsersApiTest.kt         # Пример API теста
+│   │           └── ui/...
 │   ├── build.gradle.kts
 │   └── gradle.properties
 ├── .gitignore
@@ -135,6 +150,218 @@ kotlin-qa-boilerplate/
 ├── gradlew
 ├── gradlew.bat
 └── settings.gradle.kts
+```
+
+---
+
+## API тестирование (REST Assured)
+
+Проект включает готовую инфраструктуру для API тестирования на базе REST Assured.
+
+### Конфигурация API
+
+#### ApiConfig.kt — основные настройки
+
+| Переменная | Тип | Описание | Значение по умолчанию |
+|---|---|---|---|
+| `API_BASE_URL` | String | Базовый URL API (наследуется из TestConfig) | `http://localhost:8080` |
+| `API_BASE_PATH` | String | Базовый путь (например, `/api/v1`) | `` |
+| `API_CONNECTION_TIMEOUT` | Int | Таймаут подключения (мс) | `5000` |
+| `API_READ_TIMEOUT` | Int | Таймаут чтения ответа (мс) | `10000` |
+| `API_MAX_RETRIES` | Int | Максимум повторных попыток | `0` |
+| `API_RETRY_DELAY` | Long | Задержка между попытками (мс) | `1000` |
+| `API_LOG_REQUEST` | Boolean | Логировать запросы | `true` |
+| `API_LOG_RESPONSE` | Boolean | Логировать ответы | `true` |
+| `API_LOG_DETAIL` | String | Уровень детализации логов (NONE/HEADERS/BODY/ALL/PARAMS/PATH) | `BODY` |
+| `API_CONTENT_TYPE` | String | Content-Type по умолчанию | `application/json` |
+| `API_MAX_RESPONSE_TIME` | Long | Максимальное время ответа (мс) | `5000` |
+
+#### AuthConfig.kt — авторизация
+
+| Переменная | Тип | Описание | Значение по умолчанию |
+|---|---|---|---|
+| `API_AUTH_TYPE` | String | Тип авторизации (NONE/BASIC/BEARER/API_KEY/OAUTH2) | `NONE` |
+| `API_AUTH_USERNAME` | String | Логин (для Basic auth) | `` |
+| `API_AUTH_PASSWORD` | String | Пароль (для Basic auth) | `` |
+| `API_AUTH_TOKEN` | String | Bearer токен | `` |
+| `API_AUTH_APIKEY` | String | API ключ | `` |
+| `API_AUTH_APIKEY_HEADER` | String | Заголовок для API ключа | `X-API-Key` |
+| `API_AUTH_OAUTH2_TOKEN_URL` | String | URL получения OAuth2 токена | `` |
+| `API_AUTH_OAUTH2_CLIENT_ID` | String | OAuth2 Client ID | `` |
+| `API_AUTH_OAUTH2_CLIENT_SECRET` | String | OAuth2 Client Secret | `` |
+| `API_AUTH_OAUTH2_SCOPE` | String | OAuth2 Scope | `` |
+
+### Request Specifications
+
+#### RequestSpecBuilder — создание запросов
+
+| Метод | Описание |
+|---|---|
+| `buildDefaultSpec()` | Базовая спецификация (JSON, logging) |
+| `buildAuthorizedSpec(token?)` | С авторизацией (тип из AuthConfig) |
+| `buildMultipartSpec()` | Для загрузки файлов (multipart/form-data) |
+| `buildFormUrlEncodedSpec()` | Для form-urlencoded запросов |
+| `buildWithHeaders(headers)` | С кастомными headers |
+| `buildWithContentType(contentType)` | С кастомным Content-Type |
+
+#### DefaultSpecs — готовые спецификации
+
+```kotlin
+DefaultSpecs.defaultRequestSpec          // Базовая
+DefaultSpecs.authorizedRequestSpec       // С авторизацией
+DefaultSpecs.multipartRequestSpec        // Для файлов
+DefaultSpecs.formUrlEncodedRequestSpec   // Для форм
+DefaultSpecs.authorizedWithTokenSpec("token") // С кастомным токеном
+```
+
+### Response Specifications
+
+#### ResponseSpecBuilder — валидации ответов
+
+| Метод | Описание |
+|---|---|
+| `buildDefaultSpec()` | Без валидаций |
+| `buildSuccessSpec()` | statusCode < 400 |
+| `buildStatusSpec(code)` | Конкретный статус-код |
+| `buildWithContentTypeSpec()` | Проверка Content-Type |
+| `buildWithTimeSpec(maxMs)` | Проверка времени ответа |
+| `buildWithJsonSchemaSpec(path)` | Валидация JSON схемы |
+| `buildWithFieldSpec(path, matcher)` | Проверка JSON поля |
+| `buildErrorSpec(code)` | Для ошибок (4xx/5xx) |
+| `buildStrictSpec(code, contentType, maxTime, schema)` | Комплексная валидация |
+
+#### DefaultSpecs — готовые спецификации
+
+```kotlin
+DefaultSpecs.defaultResponseSpec         // Без валидаций
+DefaultSpecs.successResponseSpec         // statusCode < 400
+DefaultSpecs.strictSuccessResponseSpec   // 200 + JSON + time
+DefaultSpecs.errorResponseSpec(404)      // Ошибка с кодом
+DefaultSpecs.jsonSchemaResponseSpec("schema.json") // Schema validation
+DefaultSpecs.timedResponseSpec(3000)     // Response time check
+```
+
+### ApiClient — базовый клиент
+
+Все API клиенты наследуются от `ApiClient` и получают готовые методы:
+
+```text
+class UsersApiClient : ApiClient() {
+    override val basePath: String = "/api/v1"
+    override val defaultSpec = DefaultSpecs.authorizedRequestSpec
+
+    fun getUsers(page: Int = 1): Response {
+        return get("/users", queryParams = mapOf("page" to page.toString()))
+    }
+
+    fun createUser(body: Map<String, Any>): Response {
+        return post("/users", body = body)
+    }
+
+    fun getUserById(id: String): Response {
+        return get("/users/{id}", pathParams = mapOf("id" to id))
+    }
+
+    fun updateUser(id: String, body: Map<String, Any>): Response {
+        return put("/users/{id}", body = body, pathParams = mapOf("id" to id))
+    }
+
+    fun deleteUser(id: String): Response {
+        return delete("/users/{id}", pathParams = mapOf("id" to id))
+    }
+}
+```
+
+### Примеры использования
+
+#### Простой тест
+
+```kotlin
+@Epic("API Tests")
+@Feature("Users")
+class UsersApiTest : BaseTest() {
+
+    private val usersClient = UsersApiClient()
+
+    @Test
+    @DisplayName("Получить список пользователей")
+    fun `get users - success`() {
+        val response = usersClient.getUsers()
+        
+        response.then()
+            .spec(DefaultSpecs.successResponseSpec)
+    }
+}
+```
+
+#### Тест с валидацией тела ответа
+
+```kotlin
+@Test
+fun `create user - validate response`() {
+    val userBody = mapOf(
+        "name" to "John Doe",
+        "email" to randomEmail()
+    )
+
+    val response = usersClient.createUser(userBody)
+
+    response.then()
+        .spec(DefaultSpecs.strictSuccessResponseSpec)
+        .body("name", equalTo("John Doe"))
+        .body("email", containsString("@"))
+}
+```
+
+#### Тест с JSON Schema валидацией
+
+```kotlin
+@Test
+fun `get user - validate schema`() {
+    val response = usersClient.getUserById("123")
+
+    response.then()
+        .spec(DefaultSpecs.successResponseSpec)
+        .spec(DefaultSpecs.jsonSchemaResponseSpec("schemas/user.json"))
+}
+```
+
+#### Тест с проверкой времени ответа
+
+```kotlin
+@Test
+fun `delete user - check response time`() {
+    val response = usersClient.deleteUser("123")
+
+    response.then()
+        .spec(DefaultSpecs.successResponseSpec)
+        .spec(DefaultSpecs.timedResponseSpec(3000)) // max 3 seconds
+}
+```
+
+### Переопределение настроек API
+
+```bash
+# Через environment variables
+API_BASE_URL=http://api.example.com \
+API_AUTH_TYPE=BEARER \
+API_AUTH_TOKEN=my-token \
+API_LOG_DETAIL=ALL \
+./gradlew test
+
+# Через JVM properties
+./gradlew test \
+  -Dapi.base.url=http://api.example.com \
+  -Dapi.auth.type=BEARER \
+  -Dapi.auth.token=my-token \
+  -Dapi.log.detail=ALL
+
+# Через application-*.properties
+# application-default.properties
+api.base.url=http://api.example.com
+api.auth.type=BEARER
+api.auth.token=my-token
+api.log.detail=BODY
 ```
 
 ---
@@ -311,13 +538,14 @@ BROWSER_TIMEOUT=15000
 - **Gradle 7.0+**
 - **Docker** (для TESTCONTAINERS и SELENOID режимов)
 - **WebDriver** (для LOCAL режима)
+- **REST Assured 5.5.0** (для API тестов — уже включён в зависимости)
 
 ---
 
 ## Команды для запуска
 
 ```bash
-# Локальный запуск (headless)
+# UI тесты
 ./gradlew test
 
 # Запуск в TestContainers с переменными окружения
@@ -328,6 +556,12 @@ BROWSER_MODE=SELENOID SELENOID_URL=http://localhost:4444 ./gradlew test
 
 # Запуск с пользовательским URL
 UI_BASE_URL=https://yoUrl.su ./gradlew test
+
+# API тесты (с кастомной конфигурацией)
+API_BASE_URL=http://api.example.com \
+API_AUTH_TYPE=BEARER \
+API_AUTH_TOKEN=my-token \
+./gradlew test
 
 # Генерация Allure отчета
 ./gradlew allureServe

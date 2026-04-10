@@ -8,6 +8,8 @@ slf4j = "2.0.13"
 logback = "1.5.6"
 aspectj = "1.9.22.1"
 commons-config = "2.10.1"
+restassured = "5.5.0"
+json-schema-validator = "5.5.0"
 
 [libraries]
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
@@ -23,6 +25,8 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.
 aspectjweaver = { group = "org.aspectj", name = "aspectjweaver", version.ref = "aspectj" }
 commons-configuration = { group = "org.apache.commons", name = "commons-configuration2", version.ref = "commons-config" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+restassured = { group = "io.rest-assured", name = "rest-assured", version.ref = "restassured" }
+restassured-json-schema = { group = "io.rest-assured", name = "json-schema-validator", version.ref = "json-schema-validator" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
