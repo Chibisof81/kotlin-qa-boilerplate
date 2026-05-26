@@ -1,7 +1,6 @@
 package core
 
 import core.config.TestConfig
-import core.core.listeners.AllureAttachmentListener
 import core.core.listeners.RetryListener
 import core.core.listeners.TestLifecycleLogger
 import org.junit.jupiter.api.*
@@ -16,14 +15,16 @@ import java.time.Instant
  *
  * Содержит общую инфраструктуру:
  * - Логирование начала/окончания тестов
- * - Allure интеграцию (скриншоты при падении)
  * - Retry механизм для flaky тестов
  * - Таймауты для тестов
  * - Общие вспомогательные методы
+ *
+ * Для UI-тестов используйте [core.BaseUiTest] — он добавляет AllureAttachmentListener
+ * и настройку браузера.
+ * Для API-тестов используйте [core.BaseApiTest] — он не требует браузера.
  */
 @ExtendWith(
     TestLifecycleLogger::class,
-    AllureAttachmentListener::class,
     RetryListener::class
 )
 abstract class BaseTest {

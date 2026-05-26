@@ -44,7 +44,6 @@ class AllureAttachmentListener : AfterTestExecutionCallback {
             // 1. Системная информация из нашего нового конфига
             attachSystemInfo(
                 """
-
                 |ОС: ${System.getProperty("os.name")}
                 |Профиль: ${EnvironmentConfig.getProperty("env", "default")}
                 |URL стенда: ${EnvironmentConfig.getProperty("ui.base.url", "N/A")}
@@ -52,20 +51,27 @@ class AllureAttachmentListener : AfterTestExecutionCallback {
                 """.trimMargin()
             )
 
-            // 2. Скриншот через Selenide (если он в стеке)
-            // Это безопаснее, чем искать файлы в папках
-            val screenshot = Selenide.screenshot(OutputType.BYTES)
-            if (screenshot != null) {
-                attachScreenshot(screenshot)
+            // 2. Скриншот через Selenide (если WebDriver активен)
+            try {
+                val screenshot = Selenide.screenshot(OutputType.BYTES)
+                if (screenshot != null) {
+                    attachScreenshot(screenshot)
+                }
+            } catch (e: Exception) {
+                log.warn("Не удалось сделать скриншот: ${e.message}")
             }
 
-            // 3. Логи браузера (Console Logs)
-            val logs = Selenide.getWebDriverLogs(LogType.BROWSER).joinToString("\n")
-            if (logs.isNotEmpty()) {
-                attachBrowserLogs(logs)
+            // 3. Логи браузера (Console Logs) — только если WebDriver активен
+            try {
+                val logs = Selenide.getWebDriverLogs(LogType.BROWSER).joinToString("\n")
+                if (logs.isNotEmpty()) {
+                    attachBrowserLogs(logs)
+                }
+            } catch (e: Exception) {
+                log.warn("Не удалось получить логи браузера: ${e.message}")
             }
 
-            // Внутри afterTestExecution, если тест упал:
+            // 4. Page Source
             try {
                 val currentUrl = WebDriverRunner.getWebDriver().currentUrl
                 val pageTitle = WebDriverRunner.getWebDriver().title
@@ -76,6 +82,25 @@ class AllureAttachmentListener : AfterTestExecutionCallback {
             } catch (e: Exception) {
                 log.warn("Не удалось получить Page Source: ${e.message}")
             }
+        }
+
+
+        // 3. Логи браузера (Console Logs)
+        val logs = Selenide.getWebDriverLogs(LogType.BROWSER).joinToString("\n")
+        if (logs.isNotEmpty()) {
+            attachBrowserLogs(logs)
+        }
+
+        // Внутри afterTestExecution, если тест упал:
+        try {
+            val currentUrl = WebDriverRunner.getWebDriver().currentUrl
+            val pageTitle = WebDriverRunner.getWebDriver().title
+            val pageContent = WebDriverRunner.source()
+
+            val fullSource = "URL: $currentUrl\nTitle: $pageTitle\n\n$pageContent"
+            attachPageSource(fullSource)
+        } catch (e: Exception) {
+            log.warn("Не удалось получить Page Source: ${e.message}")
         }
     }
 }

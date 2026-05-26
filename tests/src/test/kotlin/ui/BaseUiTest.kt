@@ -3,9 +3,12 @@ package ui
 import core.config.BrowserConfig
 import com.codeborne.selenide.Selenide
 import core.BaseTest
+import core.core.listeners.AllureAttachmentListener
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.extension.ExtendWith
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // ✅ Один экземпляр класса на все тесты
+@ExtendWith(AllureAttachmentListener::class)
 open class BaseUiTest: BaseTest() {
 
     @BeforeAll

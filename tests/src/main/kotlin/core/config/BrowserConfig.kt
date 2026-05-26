@@ -106,38 +106,37 @@ object BrowserConfig {
     }
 
     private fun configureSelenide() {
-        Configuration().apply {
-            timeout = TestConfig.Browser.timeout
-            browserSize = TestConfig.Browser.size
-            headless = shouldRunHeadless()
-            baseUrl = TestConfig.uiBaseUrl
-            reportsFolder = "build/reports/tests"
-            screenshots = true
-            savePageSource = false
+        // Устанавливаем глобальные настройки Selenide через статические поля Configuration
+        Configuration.timeout = TestConfig.Browser.timeout
+        Configuration.browserSize = TestConfig.Browser.size
+        Configuration.headless = shouldRunHeadless()
+        Configuration.baseUrl = TestConfig.uiBaseUrl
+        Configuration.reportsFolder = "build/reports/tests"
+        Configuration.screenshots = true
+        Configuration.savePageSource = false
 
-            // ✅ КЛЮЧЕВОЙ МОМЕНТ: Установить remote ПЕРЕД инициализацией браузера
-            when (mode) {
-                RunMode.TESTCONTAINERS -> {
-                    val address = webDriverContainer?.seleniumAddress?.toString()
-                        ?: throw IllegalStateException("Testcontainers not initialized")
-                    remote = address
-                    logger.info("🔴 Selenium Remote: {}", remote)
-                }
-
-                RunMode.SELENOID -> {
-                    remote = TestConfig.Browser.selenoidUrl
-                    browserVersion = TestConfig.Browser.version
-                    logger.info("🔴 Selenoid URL: {}", remote)
-                }
-
-                RunMode.LOCAL -> {
-                    remote = null  // Явно указываем локальный браузер
-                    logger.info("🌐 Using local browser")
-                }
+        // ✅ КЛЮЧЕВОЙ МОМЕНТ: Установить remote ПЕРЕД инициализацией браузера
+        when (mode) {
+            RunMode.TESTCONTAINERS -> {
+                val address = webDriverContainer?.seleniumAddress?.toString()
+                    ?: throw IllegalStateException("Testcontainers not initialized")
+                Configuration.remote = address
+                logger.info("🔴 Selenium Remote: {}", Configuration.remote)
             }
 
-            browserCapabilities = createCapabilities()
+            RunMode.SELENOID -> {
+                Configuration.remote = TestConfig.Browser.selenoidUrl
+                Configuration.browserVersion = TestConfig.Browser.version
+                logger.info("🔴 Selenoid URL: {}", Configuration.remote)
+            }
+
+            RunMode.LOCAL -> {
+                Configuration.remote = null  // Явно указываем локальный браузер
+                logger.info("🌐 Using local browser")
+            }
         }
+
+        Configuration.browserCapabilities = createCapabilities()
     }
 
     private fun buildImageName(): String {

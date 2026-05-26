@@ -1,7 +1,7 @@
 package api.example
 
 import api.spec.DefaultSpecs
-import core.BaseTest
+import core.BaseApiTest
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import io.qameta.allure.Story
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
  */
 @Epic("API Tests")
 @Feature("Users")
-class UsersApiTest : BaseTest() {
+class UsersApiTest : BaseApiTest() {
 
     private val usersClient = UsersApiClient()
 

@@ -10,7 +10,7 @@ object TestConfig {
     val env: String by lazy { EnvironmentConfig.getProperty("env", "default") }
 
     // === Настройки окружений ===
-    val apiBaseUrl: String by lazy { EnvironmentConfig.getProperty("api.base.url") }
+    val apiBaseUrl: String by lazy { EnvironmentConfig.getProperty("api.base.url", "http://localhost:8080") }
     val apiBasePath: String by lazy { EnvironmentConfig.getProperty("api.base.path", "") }
 
     val uiBaseUrl: String by lazy { EnvironmentConfig.getProperty("ui.base.url") }

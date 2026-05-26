@@ -48,9 +48,15 @@ kotlin {
 }
 
 tasks.test {
-    useJUnitPlatform() {
-        includeTags("testcontainers", "selenoid", "chrome")
+    // Опциональная фильтрация по тегам через -DincludeTags=tag1,tag2
+    // По умолчанию запускаются все тесты
+    val includeTags = System.getProperty("includeTags", "")
+    useJUnitPlatform {
+        if (includeTags.isNotEmpty()) {
+            includeTags(includeTags)
+        }
     }
+
     systemProperty("junit.jupiter.execution.parallel.enabled", "true")
     systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
     systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
