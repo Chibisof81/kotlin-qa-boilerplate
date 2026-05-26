@@ -2,7 +2,7 @@
 kotlin = "2.1.10"
 allure = "2.12.0"
 junit = "5.11.4"
-testcontainers = "1.20.4"
+testcontainers = "2.0.5"
 selenide = "7.7.1"
 slf4j = "2.0.13"
 logback = "1.5.6"
@@ -16,8 +16,8 @@ junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.r
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 testcontainers-core = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
-testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
-testcontainers-selenium = { group = "org.testcontainers", name = "selenium", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-selenium = { group = "org.testcontainers", name = "testcontainers-selenium", version.ref = "testcontainers" }
 allure-selenide = { group = "io.qameta.allure", name = "allure-selenide", version.ref = "allure" }
 selenide = { group = "com.codeborne", name = "selenide", version.ref = "selenide" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
